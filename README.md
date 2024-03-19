@@ -6,7 +6,8 @@
 - 배포 URL : https://moond1944.cafe24.com/Team_GYMG
 - Test ID : admin
 - Test PW : 1234
-
+- 주요 기능상세서 : https://moonjung2.tistory.com/4
+- 
 <br>
 
 ## 프로젝트 소개
