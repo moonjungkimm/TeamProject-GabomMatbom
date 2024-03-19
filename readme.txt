@@ -1,3 +1,1 @@
-<div align="center">
-  <p>sdfs</p>
-</div>
+<h2 align="center">✨ Tech Stack ✨</h3>
