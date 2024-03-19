@@ -1,0 +1,14 @@
+@charset "utf-8";
+html,
+body,
+* {
+	font-family: 'IBM Plex Sans KR', sans-serif, 'dotum';
+}
+
+a:link,
+a:visited,
+a:hover,
+a:focus {
+	text-decoration: none;
+	color: #000;
+}

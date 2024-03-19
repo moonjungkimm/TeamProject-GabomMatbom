@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.moon.ReviewDao">
+	
+	
+	<!-- 식당 리뷰 작성 -->
+	<insert id="insertReview"  parameterType="ReviewDto">
+		insert into review (rest_no, user_no, review_content, review_star, review_auth, review_ip) 
+		values (#{rest_no}, #{user_no}, #{review_content}, #{review_star}, (select user_nick from user where user_no = #{user_no}), #{review_ip})
+	</insert>
+	
+	<!-- 식당 리뷰 갯수 -->
+	<select id="readReviewCnt" parameterType="java.util.HashMap" resultType="int">
+		select count(*) from review where rest_no=#{rest_no}
+	</select>
+	
+	<!-- 식당 리뷰 보기 -->
+	<select id="readAllReview" parameterType="java.util.HashMap" resultType="ReviewDto">
+		select * from review where rest_no = #{rest_no} order by review_no DESC;
+	</select>
+	
+	<!-- 식당 리뷰 삭제 -->
+	<delete id="deleteReview" parameterType="ReviewDto">
+		delete from review where review_no = #{review_no}
+	</delete>
+	
+	<!-- 식당 리뷰 총평균 -->
+	<select id="restReviewAvg" parameterType="java.util.HashMap" resultType="float">
+		select avg(review_star) from review where rest_no = #{rest_no}
+	</select>
+	
+	<select id="restReviewCnt" parameterType="java.util.HashMap" resultType="int">
+		select count(*) from review where rest_no = #{rest_no} and review_star = #{review_star}
+	</select>
+	
+</mapper>
+
+
+
+
+

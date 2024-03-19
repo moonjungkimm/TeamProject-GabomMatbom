@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.moon.ParkingDao">
+
+	<select id="restAddress" parameterType="RestInfoDto" resultType="String">
+		select rest_address from restaurant where rest_no = #{rest_no}
+	</select>
+	
+	
+
+	<select id="areaCode" parameterType="String" resultType="String">
+	    <bind name="area" value="'%' + area + '%'" />
+	    select area_code from area where area_address like #{area}
+	</select>
+	
+</mapper>

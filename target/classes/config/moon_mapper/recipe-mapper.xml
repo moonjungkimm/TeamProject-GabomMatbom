@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.moon.RecipeDao">
+
+	<delete id="deleteRecipe">
+		delete from recipe where recipe_id >= 1
+	</delete>
+	
+	<update id="resetRecipe" >
+		alter table recipe auto_increment = 1
+	</update>
+		
+	<insert id="insertRecipe" parameterType="RecipeVoDto">
+		insert into recipe (title, servings, cooking_time, difficulty, img_url) 
+		values (#{title}, #{servings}, #{cooking_time}, #{difficulty}, #{img_url})
+	</insert>
+	
+	<insert id="insertRecipeStep" parameterType="RecipeVoDto">
+		insert into step (recipe_id, instruction) 
+		values (#{recipe_id}, #{instruction});
+	</insert>
+	
+	<insert id="insertRecipeIngredient" parameterType="RecipeVoDto">
+		insert into ingredient (recipe_id, ingredient_name, ingredient_amount) 
+		values (#{recipe_id}, #{ingredient_name}, #{ingredient_amount});
+	</insert>
+	
+	<select id="recipeAll" resultType="RecipeVoDto">
+		select * from recipe where recipe_id > 0
+	</select>
+	
+	<select id="recipeDetail" resultType="RecipeVoDto" parameterType="RecipeVoDto">
+		select * from recipe where recipe_id= #{recipe_id}
+	</select>
+	
+	<select id="recipeStep" resultType="RecipeVoDto" parameterType="RecipeVoDto">
+		select recipe.recipe_id, step.instruction 
+		from recipe
+		left join step
+		on recipe.recipe_id = step.recipe_id
+		where recipe.recipe_id= #{recipe_id}
+	</select>
+	
+	<select id="recipeIngredient" resultType="RecipeVoDto" parameterType="RecipeVoDto">
+		select recipe.recipe_id, ingredient.ingredient_name, ingredient.ingredient_amount
+		from recipe
+		left join ingredient
+		on recipe.recipe_id = ingredient.recipe_id
+		where recipe.recipe_id= #{recipe_id}
+	</select>
+	
+</mapper>

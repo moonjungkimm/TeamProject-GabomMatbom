@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.3.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
+   <!-- Root Context: defines shared resources visible to all other web components -->
+
+   <context:component-scan base-package="com" />
+   <context:property-placeholder
+      location="classpath:/config/db.properties" />
+
+
+   <!-- <bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource"> 
+      <property name="driverClass" value="${db.driverClass}"></property> <property 
+      name="url" value="${db.url}"></property> <property name="username" value="${db.username}"></property> 
+      <property name="password" value="${db.password}"></property> </bean> -->
+
+
+   <!-- HikariCP -->
+   <!-- HikariCP -->
+   <!-- HikariCP -->
+   <bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+      <property name="driverClassName" value="${db.driverClass}"></property>
+      <property name="jdbcUrl" value="${db.url}"></property>
+      <property name="username" value="${db.username}"></property>
+      <property name="password" value="${db.password}"></property>
+   </bean>
+   <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+      <constructor-arg ref="hikariConfig" />
+   </bean>
+   <!-- HikariCP -->
+   <!-- HikariCP -->
+   <!-- HikariCP -->
+
+
+   <!-- sqlSessionFactory -->
+   <!-- sqlSessionFactory -->
+   <!-- sqlSessionFactory -->
+   <bean id="sqlSessionFactory"
+      class="org.mybatis.spring.SqlSessionFactoryBean">
+      <property name="configLocation"
+         value="classpath:/config/mybatis-config.xml"></property>
+      <property name="dataSource" ref="dataSource"></property>
+      <property name="mapperLocations">
+         <list>
+            <!-- test-mapper -->
+            <value>classpath:/config/test-mapper.xml</value>
+            <!-- ji hwan mapper -->
+            <!-- jin woo mapper -->
+            <value>classpath:/config/jin_mapper/user-mapper.xml</value>
+            <value>classpath:/config/jin_mapper/location-mapper.xml</value>
+            <value>classpath:/config/jin_mapper/user-location-mapper.xml</value>
+            <value>classpath:/config/jin_mapper/img-file-mapper.xml</value>
+            <value>classpath:/config/jin_mapper/user-file-mapper.xml</value>
+            <value>classpath:/config/jin_mapper/jinPaging-mapper.xml</value>
+            <!-- moon jung mapper -->
+            <value>classpath:/config/moon_mapper/board-mapper.xml</value>
+            <value>classpath:/config/moon_mapper/recipe-mapper.xml</value>
+            <value>classpath:/config/moon_mapper/parking-mapper.xml</value>
+            <value>classpath:/config/moon_mapper/review-mapper.xml</value>
+            <!-- ye eun mapper -->
+            <value>classpath:/config/ye_mapper/rest-mapper.xml</value>
+         </list>
+      </property>
+   </bean>
+   <!-- sqlSessionFactory -->
+   <!-- sqlSessionFactory -->
+   <!-- sqlSessionFactory -->
+
+
+   <!-- sqlSessionTemplate -->
+   <!-- sqlSessionTemplate -->
+   <!-- sqlSessionTemplate -->
+   <bean id="sqlSession"
+      class="org.mybatis.spring.SqlSessionTemplate">
+      <constructor-arg ref="sqlSessionFactory" />
+   </bean>
+   <!-- sqlSessionTemplate -->
+   <!-- sqlSessionTemplate -->
+   <!-- sqlSessionTemplate -->
+
+   <!-- tx -->
+   <!-- tx -->
+   <!-- tx -->
+   <bean id="transactionManager"
+      class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+      <property name="dataSource" ref="dataSource"></property>
+   </bean>
+   <tx:annotation-driven />
+   <!-- tx -->
+   <!-- tx -->
+   <!-- tx -->
+
+
+   <!-- MapperScanner -->
+   <!-- MapperScanner -->
+   <!-- MapperScanner -->
+   <bean id="mapperScanner"
+      class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+      <property name="basePackage" value="com.dao"></property>
+      <property name="annotationClass" value="com.dao.MyDao"></property>
+   </bean>
+   <!-- MapperScanner -->
+   <!-- MapperScanner -->
+   <!-- MapperScanner -->
+
+
+
+
+
+</beans>

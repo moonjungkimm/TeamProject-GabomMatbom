@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ye.RestDao">
+	<select id="listRestInfo" resultType="RestInfoDto">
+		SELECT * FROM restaurant
+		ORDER BY rest_no DESC
+	</select>
+	<resultMap id="restInfoMap" type="RestInfoDto">
+		<id property="rest_no" column="rest_no" />
+		<result property="ctg_no" column="ctg_no" />
+		<result property="rest_name" column="rest_name" />
+		<result property="rest_desc" column="rest_desc" />
+		<result property="rest_address" column="rest_address" />
+		<result property="rest_address2" column="rest_address2" />
+		<result property="rest_tel" column="rest_tel" />
+		<result property="rest_time" column="rest_time" />
+		<result property="ctg_name" column="ctg_name" />
+		<result property="rest_like_cnt" column="rest_like_cnt" />
+		<result property="review_avg" column="review_avg" />
+		<result property="review_cnt" column="review_cnt" />
+		<result property="file_name" column="file_name" />
+	</resultMap>
+	<select id="readRestInfo" resultMap="restInfoMap">
+		SELECT
+		r.rest_no,
+		rc.ctg_no,
+		rc.ctg_name,
+		r.rest_name,
+		r.rest_desc,
+		r.rest_address,
+		r.rest_address2,
+		r.rest_tel,
+		date_format(r.rest_time, '%Y-%m-%d') as rest_time,
+		COUNT(DISTINCT rl.rest_like_no) AS rest_like_cnt,
+		ROUND(AVG(rr.review_star),1) AS review_avg,
+		COUNT(DISTINCT rr.review_no) AS review_cnt,
+		fn.file_name
+		FROM
+		restaurant r
+		LEFT JOIN rest_category rc USING (ctg_no)
+		LEFT JOIN
+		rest_like rl
+		USING
+		(rest_no)
+		LEFT JOIN review rr USING (rest_no)
+	    LEFT JOIN (
+	        SELECT rest_no, file_name
+	        FROM img_file 
+	        JOIN (
+	            SELECT rest_no, MIN(file_no) AS file_no
+	            FROM rest_file
+	            GROUP BY rest_no
+	        ) AS title_file USING (file_no)
+	    ) AS fn USING (rest_no)
+		WHERE
+		r.rest_no =
+		#{rest_no}
+		GROUP BY
+		r.rest_no,
+		rc.ctg_name,
+		r.rest_name,
+		r.rest_desc,
+		r.rest_address,
+		r.rest_address2,
+		r.rest_tel
+		ORDER BY rest_no
+		desc
+	</select>
+	<select id="readRestBiz" resultType="RestBizDto"
+		parameterType="int">
+		SELECT * FROM rest_biz WHERE rest_no = #{rest_no} ORDER
+		BY biz_day
+	</select>
+	<select id="listMenu" resultType="MenuDto" parameterType="int">
+		SELECT
+		* FROM menu WHERE rest_no = #{rest_no} ORDER BY menu_no asc
+	</select>
+	<insert id="insertRestInfo" parameterType="RestInfoDto"
+		useGeneratedKeys="true" keyProperty="rest_no">
+		INSERT INTO restaurant (ctg_no ,
+		rest_name, rest_tel, rest_address, rest_address2, rest_desc)
+		VALUES
+		(#{ctg_no} , #{rest_name}, #{rest_tel}, #{rest_address},
+		#{rest_address2}, #{rest_desc})
+	</insert>
+	<insert id="insertRestBiz" parameterType="RestBizDto">
+		INSERT INTO rest_biz
+		(rest_no, biz_day, biz_open, biz_close, biz_off)
+		VALUES (#{rest_no},
+		#{biz_day}, #{biz_open}, #{biz_close}, #{biz_off})
+	</insert>
+	<insert id="insertMenu" parameterType="MenuDto">
+		INSERT INTO menu (rest_no,
+		menu_name, menu_price)
+		VALUES
+		(#{rest_no}, #{menu_name}, #{menu_price} )
+	</insert>
+	<update id="updateRestInfo" parameterType="RestInfoDto">
+		UPDATE restaurant SET
+		ctg_no = #{ctg_no},
+		rest_name = #{rest_name},
+		rest_tel = #{rest_tel},
+		rest_address = #{rest_address},
+		rest_address2 = #{rest_address2},
+		rest_desc = #{rest_desc},
+		rest_time = NOW()
+		WHERE rest_no = #{rest_no}
+	</update>
+	<update id="updateRestBiz" parameterType="RestBizDto">
+		UPDATE rest_biz SET
+		biz_open = #{biz_open},
+		biz_close = #{biz_close},
+		biz_off = #{biz_off}
+		WHERE rest_no = #{rest_no} AND biz_day = #{biz_day}
+	</update>
+	<delete id="deleteMenu" parameterType="int">
+		DELETE FROM menu WHERE
+		rest_no = #{rest_no}
+	</delete>
+	<select id="readCtg" resultType="java.util.Map">
+		SELECT * FROM rest_category;
+	</select>
+	<select id="mainLocRec" resultMap="restInfoMap">
+		SELECT
+		r.rest_no,
+		rc.ctg_no,
+		rc.ctg_name,
+		r.rest_name,
+		r.rest_desc,
+		r.rest_address,
+		r.rest_address2,
+		r.rest_tel,
+		COUNT(DISTINCT rl.rest_like_no) AS rest_like_cnt,
+		ROUND(AVG(rr.review_star),1) AS review_avg,
+		COUNT(DISTINCT rr.review_no) AS review_cnt,
+		fn.file_name
+		FROM
+		restaurant r
+		LEFT JOIN
+		rest_category rc
+		USING (ctg_no)
+		LEFT JOIN rest_like rl USING
+		(rest_no)
+		LEFT JOIN review rr USING
+		(rest_no)
+	    LEFT JOIN (
+	        SELECT rest_no, file_name
+	        FROM img_file 
+	        JOIN (
+	            SELECT rest_no, MIN(file_no) AS file_no
+	            FROM rest_file
+	            GROUP BY rest_no
+	        ) AS title_file USING (file_no)
+	    ) AS fn USING (rest_no)
+		WHERE r.rest_no IN
+		(SELECT rest_no
+		FROM restaurant WHERE
+		rest_address LIKE CONCAT( '%' , #{searchKey}, '%'))
+		GROUP BY
+		r.rest_no,
+		rc.ctg_name,
+		r.rest_name,
+		r.rest_desc,
+		r.rest_address,
+		r.rest_address2,
+		r.rest_tel
+		ORDER BY review_avg desc, review_cnt desc
+		LIMIT 6
+	</select>
+	<select id="mainLikeRec" resultMap="restInfoMap">
+		<!-- SELECT
+		r.rest_no,
+		rc.ctg_no,
+		rc.ctg_name,
+		r.rest_name,
+		r.rest_desc,
+		r.rest_address,
+		r.rest_address2,
+		r.rest_tel,
+		COUNT(DISTINCT rl.rest_like_no) AS rest_like_cnt,
+		ROUND(AVG(rr.review_star),1) AS review_avg,
+		COUNT(DISTINCT rr.review_no) AS review_cnt
+		FROM
+		restaurant r
+		LEFT JOIN
+		rest_category rc
+		USING (ctg_no)
+		LEFT JOIN rest_like rl USING
+		(rest_no)
+		LEFT JOIN review rr USING
+		(rest_no)
+		GROUP BY
+		r.rest_no,
+		rc.ctg_name,
+		r.rest_name,
+		r.rest_desc,
+		r.rest_address,
+		r.rest_address2,
+		r.rest_tel
+		ORDER BY rest_like_cnt desc,
+		review_avg desc, review_cnt desc
+		LIMIT 6 -->
+		SELECT
+		    r.rest_no,
+		    rc.ctg_no,
+		    rc.ctg_name,
+		    r.rest_name,
+		    r.rest_desc,
+		    r.rest_address,
+		    r.rest_address2,
+		    r.rest_tel,
+		    COUNT(DISTINCT rl.rest_like_no) AS rest_like_cnt,
+		    ROUND(AVG(rr.review_star),1) AS review_avg,
+		    COUNT(DISTINCT rr.review_no) AS review_cnt,
+		    fn.file_name
+		FROM
+		    restaurant r
+		    LEFT JOIN rest_category rc USING (ctg_no)
+		    LEFT JOIN rest_like rl USING (rest_no)
+		    LEFT JOIN review rr USING (rest_no)
+		    LEFT JOIN (
+		        SELECT rest_no, file_name
+		        FROM img_file 
+		        JOIN (
+		            SELECT rest_no, MIN(file_no) AS file_no
+		            FROM rest_file
+		            GROUP BY rest_no
+		        ) AS title_file USING (file_no)
+		    ) AS fn USING (rest_no)
+		GROUP BY
+		    r.rest_no,
+		    rc.ctg_no,
+		    rc.ctg_name,
+		    r.rest_name,
+		    r.rest_desc,
+		    r.rest_address,
+		    r.rest_address2,
+		    r.rest_tel,
+		    fn.file_name
+		ORDER BY
+		    rest_like_cnt DESC,
+		    review_avg DESC,
+		    review_cnt DESC
+		LIMIT 6
+	</select>
+	<select id="searchCtg" resultMap="restInfoMap">
+		SELECT
+		r.rest_no,
+		rc.ctg_no,
+		rc.ctg_name,
+		r.rest_name,
+		r.rest_desc,
+		r.rest_address,
+		r.rest_address2,
+		r.rest_tel,
+		COUNT(DISTINCT rl.rest_like_no) AS rest_like_cnt,
+		ROUND(AVG(rr.review_star),1) AS review_avg,
+		COUNT(DISTINCT rr.review_no) AS review_cnt,
+		fn.file_name
+		FROM
+		restaurant r
+		LEFT
+		JOIN rest_category rc
+		USING (ctg_no)
+		LEFT JOIN rest_like rl
+		USING
+		(rest_no)
+		LEFT JOIN review rr
+		USING (rest_no)
+	    LEFT JOIN (
+	        SELECT rest_no, file_name
+	        FROM img_file 
+	        JOIN (
+	            SELECT rest_no, MIN(file_no) AS file_no
+	            FROM rest_file
+	            GROUP BY rest_no
+	        ) AS title_file USING (file_no)
+	    ) AS fn USING (rest_no)
+		<where>
+			<if test="ctgNos != null and ctgNos.size() > 0">
+				AND ctg_no IN
+				<foreach collection="ctgNos" item="ctgNo" open="("
+					separator="," close=")">
+					#{ctgNo}
+				</foreach>
+			</if>
+			<if test="searchKey != null">
+				AND rest_no IN (
+				SELECT rest_no FROM restaurant
+				WHERE
+				rest_name
+				LIKE CONCAT ('%', #{searchKey}, '%')
+				OR rest_desc LIKE
+				CONCAT ('%', #{searchKey}, '%')
+				OR rest_address LIKE CONCAT ('%',
+				#{searchKey}, '%')
+				UNION
+				SELECT rest_no FROM menu
+				WHERE menu_name LIKE
+				CONCAT ('%', #{searchKey}, '%')
+				)
+			</if>
+		</where>
+
+		GROUP BY
+		r.rest_no,
+		rc.ctg_name,
+		r.rest_name,
+		r.rest_desc,
+		r.rest_address,
+		r.rest_address2,
+		r.rest_tel
+		ORDER BY review_avg desc, review_cnt desc, rest_like_cnt desc
+	</select>
+	<select id="checkAdminPw" resultType="string">
+		SELECT user_pw from user
+		WHERE type_no = 1
+	</select>
+	<delete id="deleteRestInfo" parameterType="int">
+		DELETE FROM restaurant
+		WHERE rest_no = #{rest_no}
+	</delete>
+	<insert id="insertFile" parameterType="RestFileDto" useGeneratedKeys="true" keyProperty="file_no">
+		INSERT into img_file (file_name) values (#{file_name})
+	</insert>
+	<insert id="insertRestFile" parameterType="RestFileDto">
+		INSERT into rest_file (file_no, rest_no) values (#{file_no}, #{rest_no})
+	</insert>
+	<select id="listRestFile" resultType="RestFileDto" parameterType="int">
+		SELECT i.file_no, i.file_name, i.file_time, rf.rest_no 
+		FROM img_file i 
+		JOIN rest_file rf 
+		ON i.file_no = rf.file_no 
+		WHERE rest_no = #{rest_no}
+	</select>
+	<select id="countLikeRest" resultType="int" parameterType="int">
+		SELECT count(*) FROM rest_like WHERE rest_no = #{rest_no}
+	</select>
+	<select id="amILikeRest" resultType="int" parameterType="map">
+		SELECT count(*) FROM rest_like WHERE rest_no = #{rest_no} AND user_no = #{user_no}
+	</select>
+	<insert id="addLikeRest" parameterType="map">
+		INSERT INTO rest_like (rest_no, user_no) VALUES (#{rest_no}, #{user_no})
+	</insert>
+	<delete id="deleteLikeRest" parameterType="map">
+		DELETE FROM rest_like WHERE rest_no = #{rest_no} AND user_no = #{user_no}
+	</delete>
+
+</mapper>
