@@ -1,7 +1,7 @@
 # 🥄 가봄, 맛봄
 
-![readme_mockup2](![Frame 39](https://github.com/moonjungkimm/Gabom-Matbom/assets/152701559/1b361e32-9c35-475c-b7cb-401c8c58c5c6)
-)
+![Frame 39](https://github.com/moonjungkimm/Gabom-Matbom/assets/152701559/1b361e32-9c35-475c-b7cb-401c8c58c5c6)
+
 
 - 배포 URL : https://moond1944.cafe24.com/Team_GYMG
 - Test ID : admin
